@@ -1,0 +1,28 @@
+
+const jwt  = require("jsonwebtoken");
+const User = require("../models/User");
+
+const protect = async (req, res, next) => {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith("Bearer "))
+    return res.status(401).json({ message: "Not authorised — no token" });
+  try {
+    const decoded = jwt.verify(auth.split(" ")[1], process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id);
+    if (!req.user) return res.status(401).json({ message: "User not found" });
+    next();
+  } catch (e) { res.status(401).json({ message: "Token invalid or expired" }); }
+};
+
+const optionalAuth = async (req, res, next) => {
+  const auth = req.headers.authorization;
+  if (auth && auth.startsWith("Bearer ")) {
+    try {
+      const decoded = jwt.verify(auth.split(" ")[1], process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id);
+    } catch (e) {}
+  }
+  next();
+};
+
+module.exports = { protect, optionalAuth };

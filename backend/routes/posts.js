@@ -1,0 +1,14 @@
+const express = require('express');
+const { getPosts, getPost, createPost, updatePost, deletePost, toggleLike } = require('../controllers/postController');
+const { getComments, addComment } = require('../controllers/commentController');
+const { protect, optionalAuth } = require('../middleware/auth');
+const r = express.Router();
+r.get('/',    optionalAuth, getPosts);
+r.get('/:id', optionalAuth, getPost);
+r.post('/',   protect, createPost);
+r.put('/:id', protect, updatePost);
+r.delete('/:id', protect, deletePost);
+r.post('/:id/like', protect, toggleLike);
+r.get('/:postId/comments',  getComments);
+r.post('/:postId/comments', protect, addComment);
+module.exports = r;
